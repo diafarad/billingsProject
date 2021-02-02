@@ -10,7 +10,7 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;
 
-class MoisReport implements
+class AllDetails implements
     FromCollection,
     WithHeadings,
     ShouldAutoSize,
@@ -36,6 +36,10 @@ class MoisReport implements
     */
     public function collection()
     {
+        $q = DB::select('SELECT DISTINCT(subscriber_name) as inst
+                               FROM billing_stats
+                               WHERE subscriber_name LIKE "%'.$this->pays.'"');
+        $sheets = array();
         $jourMax = 1;
         switch ($this->mois){
             case 5:
@@ -65,34 +69,27 @@ class MoisReport implements
         }
         $from = date('2020-'.$this->mois.'-01');
         $to = date('2020-'.$this->mois.'-'.$jourMax);
-
-        $result = DB::select('SELECT b.stats_date as dateSt, rv.n as "RapportVide", rd.n as "RapportData", COUNT(DISTINCT(b.user_name)) as "NbUser"
+        $rv = 'rapport de crédit bic civ vide';
+        $rd = 'rapport de crédit bic civ plus';
+        foreach ($q as $res) {
+            $r = DB::select('SELECT b.stats_date as dateSt, rv.n as "RapportVide", rd.n as "RapportData", COUNT(DISTINCT(b.user_name)) as "NbUser", b.subscriber_name
                                     FROM billing_stats b, (SELECT stats_date, COUNT(usage_name) as "n"
-                                                               FROM billing_stats
-                                                               WHERE lower(usage_name) = "rapport de crédit bic civ vide" AND subscriber_name LIKE "%'.$this->pays.'"
-                                                               AND stats_date BETWEEN "'.$from.'" AND "'.$to.'"
-                                                               GROUP BY stats_date) rv,
+                                                           FROM billing_stats
+                                                           WHERE lower(usage_name) = "'.$rv.'" AND subscriber_name = "'.$res->inst.'"
+                                                           AND stats_date BETWEEN "'.$from.'" AND "'.$to.'"
+                                                           GROUP BY stats_date) rv,
                                                           (SELECT stats_date, COUNT(usage_name) as "n"
-                                                               FROM billing_stats
-                                                               WHERE lower(usage_name) = "rapport de crédit bic civ plus" AND subscriber_name LIKE "%'.$this->pays.'"
-                                                                		AND stats_date BETWEEN "'.$from.'" AND "'.$to.'"
-                                                               GROUP BY stats_date) rd
+                                                           FROM billing_stats
+                                                           WHERE lower(usage_name) = "'.$rd.'" AND subscriber_name = "'.$res->inst.'"
+                                                           AND stats_date BETWEEN "'.$from.'" AND "'.$to.'"
+                                                           GROUP BY stats_date) rd
                                     WHERE b.stats_date = rv.stats_date AND b.stats_date=rd.stats_date
-                                    AND b.subscriber_name LIKE "%'.$this->pays.'"
+                                    AND b.subscriber_name = "'.$res->inst.'"
                                     AND b.stats_date BETWEEN "'.$from.'" AND "'.$to.'"
-                                    GROUP BY b.stats_date, rv.n, rd.n');
-
-        return collect($result);
-    }
-
-    public function headings(): array
-    {
-        return [
-            'Date',
-            'Rapport vide',
-            'Rapport avec données',
-            'Nbre User',
-        ];
+                                    GROUP BY b.stats_date, rv.n, rd.n, b.subscriber_name');
+            $sheets[] = $r;
+        }
+        return collect($sheets)->collapse();
     }
 
     public function registerEvents(): array
@@ -108,8 +105,21 @@ class MoisReport implements
         ];
     }
 
+    public function headings(): array
+    {
+        return [
+            ['OKAY'],
+            ['YES', 'GOOD'],
+            ['Date',
+            'Rapport vide',
+            'Rapport avec données',
+            'Nbre User',
+            'Institution',]
+        ];
+    }
+
     public function title(): string
     {
-        return 'Mois';
+        return 'Details';
     }
 }

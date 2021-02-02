@@ -33,6 +33,7 @@ class BillingExportMulti implements WithMultipleSheets
             case 12:
             case 1:
                 $sheets[] = new MoisReport($this->mois,$this->pays);
+                $sheets[] = new AllDetails($this->mois,$this->pays);
                 for ($jour = 1 ; $jour<=31;$jour++){
                     $sheets[] = new BillingsExport($this->mois,$jour,$this->pays);
                 }
@@ -41,12 +42,14 @@ class BillingExportMulti implements WithMultipleSheets
                 $an = date('Y');
                 if ($an % 400 == 0){
                     $sheets[] = new MoisReport($this->mois,$this->pays);
+                    $sheets[] = new AllDetails($this->mois,$this->pays);
                     for ($jour = 1 ; $jour<=29;$jour++){
                         $sheets[] = new BillingsExport($this->mois,$jour,$this->pays);
                     }
                 }
                 else{
                     $sheets[] = new MoisReport($this->mois,$this->pays);
+                    $sheets[] = new AllDetails($this->mois,$this->pays);
                     for ($jour = 1 ; $jour<=28;$jour++){
                         $sheets[] = new BillingsExport($this->mois,$jour,$this->pays);
                     }
@@ -57,6 +60,7 @@ class BillingExportMulti implements WithMultipleSheets
             case 11:
             case 4:
                 $sheets[] = new MoisReport($this->mois,$this->pays);
+                $sheets[] = new AllDetails($this->mois,$this->pays);
                 for ($jour = 1 ; $jour<=30;$jour++){
                     $sheets[] = new BillingsExport($this->mois,$jour,$this->pays);
                 }

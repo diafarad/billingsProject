@@ -2,26 +2,29 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
+use App\Exports\MyExport;
+use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ReportDataController extends Controller
 {
-    function reports(Request $request ): array
-    {
-        try {
-            $this->validate($request, ['id' => 'required|exists:countries,id']);
-            $states = State::where('country_id', $request->get('id') )->get();
-            //you can handle output in different ways, I just use a custom filled array. you may pluck data and directly output your data.
-            $output = [];
-            foreach( $states as $state )
-            {
-                $output[$state->id] = $state->name;
-            }
-            return $output;
-        } catch (ValidationException $e) {
-        }
-
-
+    function importExportView (){
+        $intitutions = DB::select('SELECT DISTINCT subscriber_name as name
+                                            FROM billing_stats
+                                            where subscriber_name like "%SN"
+                                            ORDER BY subscriber_name ASC');
+        $lesDates = DB::select('SELECT DISTINCT stats_date as d
+                                        FROM billing_stats
+                                        WHERE stats_date BETWEEN "2020-12-01" AND "2020-12-31"
+                                        ORDER BY stats_date ASC');
+        return view('myexport', [
+            'institutions' => $intitutions,
+            'lesdates' => $lesDates
+        ]);
     }
+
+    function export (){
+        return Excel::download(new MyExport, 'Details.xlsx');
+    }
+
 }

@@ -3,7 +3,6 @@
 namespace App\Exports;
 
 use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
 class DetailsMultiInstitution implements WithMultipleSheets

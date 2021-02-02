@@ -20,4 +20,6 @@ Route::get('/', function () {
 });
 
 Route::resource('reports',ReportController::class);
+Route::get('importExportView', [ReportDataController::class, 'importExportView']);
+Route::get('myexport', [ReportDataController::class, 'export'])->name('export');
 

@@ -3,11 +3,8 @@
 namespace App\Console\Commands;
 
 use App\Exports\BillingExportMulti;
-use App\Exports\BillingsExport;
 use App\Exports\DetailsMultiInstitution;
-use App\Models\billing_stats;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ReportDaily extends Command
@@ -66,7 +63,7 @@ class ReportDaily extends Command
         $today = gmdate('d-m-Y-H-i');
 
         if (Excel::store(new BillingExportMulti($mois,$pays),  'rapport_export_'.$pays.''.$mois.'_'.$today.'.xlsx') AND Excel::store(new DetailsMultiInstitution($mois,$pays),  'Details_Institutions_'.$pays.''.$mois.'_'.$today.'.xlsx')){
-            $this->info('Export successfuly');
+            $this->info('Export successfully');
         }
         else{
             $this->error('Error! Something went wrong');

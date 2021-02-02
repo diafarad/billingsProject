@@ -45,7 +45,9 @@
         <option value="11">11 - Novembre</option>
         <option value="12">12 - Décembre</option>
     </select>
-  <table class="table">
+    <a style="float: right; margin-left: 5px" class="btn btn-primary" href="/myexport">Export</a>
+    <a style="float: right" class="btn btn-info" href="/importExportView">View</a>
+  <table id="resData" class="table">
     <thead>
         <tr class="table-info">
           <!--<td>ID</td>-->
@@ -65,37 +67,4 @@
     </tbody>
   </table>
 <div>
-    <script>
-        $(function(){
-            $('#mois').change(function(){
-                var mois = $(this).value();
-                var pays = $("#pays").val();
-                if (mois !== ''){
-                    $.ajax({
-                        url : '{{ route( 'loadDatas' ) }}',
-                        data: {
-                            "pays": pays,
-                            "mois": mois
-                        },
-                        type: 'post',
-                        dataType: 'json',
-                        success: function( result )
-                        {
-                            $.each( result, function(k, v) {
-                                $('#state').append($('<option>', {value:k, text:v}));
-                            });
-                        },
-                        error: function()
-                        {
-                            //handle errors
-                            alert('error...');
-                        }
-                    });
-                }
-                else {
-                    alert('Choisir le pays...');
-                }
-            });
-        });
-    </script>
 @endsection
