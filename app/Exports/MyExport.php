@@ -40,11 +40,6 @@ class MyExport implements
             AfterSheet::class => function(AfterSheet $event){
                 $event->sheet->getDelegate()->getStyle('A1:DR1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 $event->sheet->getDelegate()->getDefaultColumnDimension()->setWidth(12);
-                $event->sheet->getStyle("A1:DR1")->applyFromArray([
-                    'text-align' => [
-                        'center' => 'true'
-                    ]
-                ]);
                 $event->sheet->getStyle('A1:DR1')->applyFromArray([
                     'font' => [
                         'bold' => 'true'
@@ -54,6 +49,19 @@ class MyExport implements
                     'font' => [
                         'bold' => 'true'
                     ]
+                ]);
+                $event->sheet->getStyle('A3:DR3')->applyFromArray([
+                    'font' => [
+                        'bold' => 'true'
+                    ]
+                ]);
+                $event->sheet->getStyle('A1:DQ34')->applyFromArray([
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color' => ['argb' => '000000'],
+                        ],
+                    ],
                 ]);
             }
         ];

@@ -7,11 +7,53 @@
         @endforeach
     </tr>
     <tr>
-        <th>Date</th>
+        <th></th>
         @foreach($institutions as $inst)
             <th>RVide</th>
             <th>RData</th>
             <th>NbUser</th>
+        @endforeach
+    </tr>
+    <tr>
+        <th>TOTAL</th>
+        @foreach($institutions as $inst)
+            <?php
+            ini_set('max_execution_time', 500);
+            $res = \Illuminate\Support\Facades\DB::select('SELECT COALESCE(rv.n,0) as "TotalRapportVide", COALESCE(rd.n,0) as "TotalRapportData", COALESCE(COUNT(DISTINCT(user_name)),0) as "TotalNbUser"
+                                                                        FROM billing_stats b, (SELECT subscriber_name as "s", COUNT(usage_name) as "n"
+                                                                                                   FROM billing_stats
+                                                                                                   WHERE lower(usage_name) = "rapport de crédit bic civ vide" AND subscriber_name = "'.$inst->name.'"
+                                                                                                   AND stats_date BETWEEN "2020-12-01" AND "2020-12-31"
+                                                                                                   GROUP BY subscriber_name) rv,
+                                                                                              (SELECT subscriber_name as "s", COUNT(usage_name) as "n"
+                                                                                                   FROM billing_stats
+                                                                                                   WHERE lower(usage_name) = "rapport de crédit bic civ plus" AND subscriber_name = "'.$inst->name.'"
+                                                                                                   AND stats_date BETWEEN "2020-12-01" AND "2020-12-31"
+                                                                                                   GROUP BY subscriber_name) rd
+                                                                        WHERE b.subscriber_name = "'.$inst->name.'"
+                                                                        AND b.subscriber_name = rd.s AND b.subscriber_name = rv.s
+                                                                        AND b.stats_date BETWEEN "2020-12-01" AND "2020-12-31"
+                                                                        GROUP BY rv.n, rd.n');
+
+
+            if(empty($res)){
+            ?>
+            <th>0</th>
+            <th>0</th>
+            <th>0</th>
+            <?php
+            }
+            else{
+
+            foreach ($res as $r){
+            ?>
+            <th><?php echo $r->TotalRapportVide; ?></th>
+            <th><?php echo $r->TotalRapportData; ?></th>
+            <th><?php echo $r->TotalNbUser; ?></th>
+            <?php
+            }
+            }
+            ?>
         @endforeach
     </tr>
     </thead>
