@@ -58,12 +58,39 @@ class ReportDaily extends Command
         }
 
         $this->info('Mois : '.$mois. ', Pays : '. $pays);
+        $jourMax = 1;
+        switch ($mois){
+            case 5:
+            case 3:
+            case 7:
+            case 8:
+            case 10:
+            case 12:
+            case 1:
+                $jourMax=31;
+                break;
+            case 2:
+                $an = date('Y');
+                if ($an % 400 == 0){
+                    $jourMax=29;
+                }
+                else{
+                    $jourMax=28;
+                }
+                break;
+            case 6:
+            case 9:
+            case 11:
+            case 4:
+                $jourMax=30;
+                break;
+        }
         $from = date('2020-'.$mois.'-01');
-        $to = date('2020-'.$mois.'-31');
+        $to = date('2020-'.$mois.'-'.$jourMax);
         $this->info('De : '.$from.', A : '.$to.', Pays : '.$pays);
         $today = gmdate('d-m-Y-H-i');
 
-        if (Excel::store(new MyExport, 'myexport.xlsx'.$pays.''.$mois.'_'.$today.'.xlsx') /*Excel::store(new BillingExportMulti($mois,$pays),  'rapport_export_'.$pays.''.$mois.'_'.$today.'.xlsx') AND Excel::store(new DetailsMultiInstitution($mois,$pays),  'Details_Institutions_'.$pays.''.$mois.'_'.$today.'.xlsx')*/){
+        if (Excel::store(new MyExport($mois,$pays), 'myexport_'.$pays.''.$mois.'_'.$today.'.xlsx') /*Excel::store(new BillingExportMulti($mois,$pays),  'rapport_export_'.$pays.''.$mois.'_'.$today.'.xlsx') AND Excel::store(new DetailsMultiInstitution($mois,$pays),  'Details_Institutions_'.$pays.''.$mois.'_'.$today.'.xlsx')*/){
             $this->info('Export successfully');
         }
         else{
