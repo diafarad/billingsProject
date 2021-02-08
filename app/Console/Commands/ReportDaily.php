@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
-use App\Exports\BillingExportMulti;
-use App\Exports\DetailsMultiInstitution;
+use App\Exports\Dashboard;
 use App\Exports\MyExport;
+use App\Exports\RapportExport;
 use Illuminate\Console\Command;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -90,7 +90,7 @@ class ReportDaily extends Command
         $this->info('De : '.$from.', A : '.$to.', Pays : '.$pays);
         $today = gmdate('d-m-Y-H-i');
 
-        if (Excel::store(new MyExport($mois,$pays), 'myexport_'.$pays.''.$mois.'_'.$today.'.xlsx') /*Excel::store(new BillingExportMulti($mois,$pays),  'rapport_export_'.$pays.''.$mois.'_'.$today.'.xlsx') AND Excel::store(new DetailsMultiInstitution($mois,$pays),  'Details_Institutions_'.$pays.''.$mois.'_'.$today.'.xlsx')*/){
+        if (Excel::store(new RapportExport($mois,$pays), 'Rapport_'.$today.'_'.$pays.'_'.$mois.'.xlsx') /*Excel::store(new BillingExportMulti($mois,$pays),  'rapport_export_'.$pays.''.$mois.'_'.$today.'.xlsx') AND Excel::store(new DetailsMultiInstitution($mois,$pays),  'Details_Institutions_'.$pays.''.$mois.'_'.$today.'.xlsx')*/){
             $this->info('Export successfully');
         }
         else{

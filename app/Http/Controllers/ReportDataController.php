@@ -9,22 +9,42 @@ use Maatwebsite\Excel\Facades\Excel;
 class ReportDataController extends Controller
 {
     function importExportView (){
-        $intitutions = DB::select('SELECT DISTINCT subscriber_name as name
+        $institutions = DB::select('SELECT DISTINCT subscriber_name as name
                                             FROM billing_stats
-                                            where subscriber_name like "%SN"
+                                            where subscriber_name like "%GW"
                                             ORDER BY subscriber_name ASC');
         $lesDates = DB::select('SELECT DISTINCT stats_date as d
                                         FROM billing_stats
                                         WHERE stats_date BETWEEN "2020-12-01" AND "2020-12-31"
                                         ORDER BY stats_date ASC');
+        $from = date('2020-12-01');
+        $to = date('2020-12-31');
+
+        $nbBEF = DB::select('SELECT COUNT(DISTINCT b.subscriber_name) as n
+                             FROM billing_stats b, subscribers s
+                             WHERE b.subscriber_name = s.name
+                             AND lower(s.sector) = "banque"
+                             AND b.subscriber_name like "%GW"');
+
+        $nbSFD = DB::select('SELECT COUNT(b.subscriber_name) as n
+                             FROM billing_stats b, subscribers s
+                             WHERE b.subscriber_name = s.name
+                             AND lower(s.sector) = "autre sfd"
+                             AND b.subscriber_name like "%GW"');
+
+
         return view('myexport', [
-            'institutions' => $intitutions,
-            'lesdates' => $lesDates
+            'institutions' => $institutions,
+            'lesdates' => $lesDates,
+            'from' => $from,
+            'to' => $to,
+            'BEF' => $nbBEF,
+            'SFD' => $nbSFD,
         ]);
     }
 
     function export (){
-        return Excel::download(new MyExport, 'Details.xlsx');
+        return Excel::download(new MyExport(12,"GW"), 'Details.xlsx');
     }
 
 }
