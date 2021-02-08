@@ -75,7 +75,7 @@ class MyExport implements
                              AND lower(s.sector) = "banque"
                              AND b.subscriber_name like "%'.$this->pays.'"');
 
-        $nbSFD = DB::select('SELECT COUNT(b.subscriber_name) as n
+        $nbSFD = DB::select('SELECT COUNT(DISTINCT b.subscriber_name) as n
                              FROM billing_stats b, subscribers s
                              WHERE b.subscriber_name = s.name
                              AND lower(s.sector) = "autre sfd"
@@ -201,6 +201,6 @@ class MyExport implements
 
     public function title(): string
     {
-        return "Details";
+        return "Détails";
     }
 }

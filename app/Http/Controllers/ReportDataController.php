@@ -11,7 +11,7 @@ class ReportDataController extends Controller
     function importExportView (){
         $institutions = DB::select('SELECT DISTINCT subscriber_name as name
                                             FROM billing_stats
-                                            where subscriber_name like "%GW"
+                                            where subscriber_name like "%CI"
                                             ORDER BY subscriber_name ASC');
         $lesDates = DB::select('SELECT DISTINCT stats_date as d
                                         FROM billing_stats
@@ -24,13 +24,13 @@ class ReportDataController extends Controller
                              FROM billing_stats b, subscribers s
                              WHERE b.subscriber_name = s.name
                              AND lower(s.sector) = "banque"
-                             AND b.subscriber_name like "%GW"');
+                             AND b.subscriber_name like "%CI"');
 
         $nbSFD = DB::select('SELECT COUNT(b.subscriber_name) as n
                              FROM billing_stats b, subscribers s
                              WHERE b.subscriber_name = s.name
                              AND lower(s.sector) = "autre sfd"
-                             AND b.subscriber_name like "%GW"');
+                             AND b.subscriber_name like "%CI"');
 
 
         return view('myexport', [

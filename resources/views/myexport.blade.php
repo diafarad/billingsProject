@@ -39,34 +39,57 @@
         @foreach($institutions as $inst)
             <?php
             ini_set('max_execution_time', 500);
-            $res = \Illuminate\Support\Facades\DB::select('SELECT COALESCE(rv.n,0) as "TotalRapportVide", COALESCE(rd.n,0) as "TotalRapportData", COALESCE(COUNT(DISTINCT(b.user_name)),0) as "TotalNbUser"
-                                                                        FROM billing_stats b, (SELECT subscriber_name as "s", COUNT(usage_name) as "n"
-                                                                                                   FROM billing_stats
-                                                                                                   WHERE lower(usage_name) = "rapport de crédit bic civ vide" AND subscriber_name = "'.$inst->name.'"
-                                                                                                   AND stats_date BETWEEN "'.$from.'" AND "'.$to.'"
-                                                                                                   GROUP BY subscriber_name) rv,
-                                                                                              (SELECT subscriber_name as "s", COUNT(usage_name) as "n"
-                                                                                                   FROM billing_stats
-                                                                                                   WHERE lower(usage_name) = "rapport de crédit bic civ plus" AND subscriber_name = "'.$inst->name.'"
-                                                                                                   AND stats_date BETWEEN "'.$from.'" AND "'.$to.'"
-                                                                                                   GROUP BY subscriber_name) rd
-                                                                        WHERE b.subscriber_name = "'.$inst->name.'"
-                                                                        AND b.subscriber_name = rd.s AND b.subscriber_name = rv.s
-                                                                        AND b.stats_date BETWEEN "'.$from.'" AND "'.$to.'"
-                                                                        GROUP BY rv.n, rd.n');
-            if(empty($res)){
+
+            $totalRvide = \Illuminate\Support\Facades\DB::select('SELECT COUNT(usage_name) as "n"
+                                                                    FROM billing_stats
+                                                                    WHERE lower(usage_name) = "rapport de crédit bic civ vide" AND subscriber_name = "'.$inst->name.'"
+                                                                    AND stats_date BETWEEN "'.$from.'" AND "'.$to.'"
+                                                                    GROUP BY subscriber_name');
+
+            $totalRdata = \Illuminate\Support\Facades\DB::select('SELECT COUNT(usage_name) as "n"
+                                                                    FROM billing_stats
+                                                                    WHERE lower(usage_name) = "rapport de crédit bic civ plus" AND lower(detail_name)="données sur le crédit" AND subscriber_name = "'.$inst->name.'"
+                                                                    AND stats_date BETWEEN "'.$from.'" AND "'.$to.'"
+                                                                    GROUP BY subscriber_name');
+
+            $totalUser = \Illuminate\Support\Facades\DB::select('SELECT COUNT(DISTINCT user_name) as "n"
+                                                                    FROM billing_stats
+                                                                    WHERE ((lower(usage_name) = "rapport de crédit bic civ plus" AND lower(detail_name)="données sur le crédit") OR lower(usage_name) = "rapport de crédit bic civ vide") AND subscriber_name = "'.$inst->name.'"
+                                                                    AND stats_date BETWEEN "'.$from.'" AND "'.$to.'"
+                                                                    GROUP BY subscriber_name');
+            if(empty($totalRvide)){
             ?>
-            <th>0</th>
-            <th>0</th>
-            <th>0</th>
+            <td>0</td>
             <?php
             }
             else{
-            foreach ($res as $r){
+            foreach ($totalRvide as $rv){
             ?>
-            <th><?php echo $r->TotalRapportVide; ?></th>
-            <th><?php echo $r->TotalRapportData; ?></th>
-            <th><?php echo $r->TotalNbUser; ?></th>
+            <td><?php echo $rv->n; ?></td>
+            <?php
+            }
+            }
+            if(empty($totalRdata)){
+            ?>
+            <td>0</td>
+            <?php
+            }
+            else{
+            foreach ($totalRdata as $rd){
+            ?>
+            <td><?php echo $rd->n; ?></td>
+            <?php
+            }
+            }
+            if(empty($totalUser)){
+            ?>
+            <td>0</td>
+            <?php
+            }
+            else{
+            foreach ($totalUser as $u){
+            ?>
+            <td><?php echo $u->n; ?></td>
             <?php
             }
             }
@@ -88,12 +111,12 @@
                                                                                GROUP BY stats_date');
                 $rapportData = \Illuminate\Support\Facades\DB::select('SELECT COUNT(usage_name) as "plus"
                                                                                FROM billing_stats
-                                                                               WHERE lower(usage_name) = "rapport de crédit bic civ plus" AND subscriber_name = "'.$ins->name.'"
+                                                                               WHERE lower(usage_name) = "rapport de crédit bic civ plus" AND lower(detail_name)="données sur le crédit" AND subscriber_name = "'.$ins->name.'"
                                                                                AND stats_date = "'.$date->d.'"
                                                                                GROUP BY stats_date');
                 $nbreUser = \Illuminate\Support\Facades\DB::select('SELECT COUNT(DISTINCT(user_name)) as "user"
                                                                             FROM billing_stats
-                                                                            WHERE (lower(usage_name) = "rapport de crédit bic civ plus" OR lower(usage_name) = "rapport de crédit bic civ vide") AND subscriber_name = "'.$ins->name.'"
+                                                                            WHERE ((lower(usage_name) = "rapport de crédit bic civ plus" AND lower(detail_name)="données sur le crédit") OR lower(usage_name) = "rapport de crédit bic civ vide") AND subscriber_name = "'.$ins->name.'"
                                                                             AND stats_date = "'.$date->d.'"
                                                                             GROUP BY stats_date');
                 if(empty($rapportVide)){

@@ -32,7 +32,7 @@ class Dashboard implements
     }
     public function view(): View
     {
-        $intitutions = DB::select('SELECT DISTINCT subscriber_name as name
+        $institutions = DB::select('SELECT DISTINCT subscriber_name as name
                                             FROM billing_stats
                                             WHERE subscriber_name LIKE "%'.$this->pays.'"
                                             ORDER BY subscriber_name ASC');
@@ -65,7 +65,7 @@ class Dashboard implements
         $from = date('2020-'.$this->mois.'-01');
         $to = date('2020-'.$this->mois.'-'.$this->jMax);
         return view('dashboard', [
-            'institutions' => $intitutions,
+            'institutions' => $institutions,
             'from' => $from,
             'to' => $to,
         ]);
