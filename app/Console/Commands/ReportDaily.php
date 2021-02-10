@@ -15,7 +15,7 @@ class ReportDaily extends Command
      *
      * @var string
      */
-    protected $signature = 'report:daily {mois : two digits like 01, 07, 11...} {pays : example : SN, BF, CI, ML....}';
+    protected $signature = 'report:daily {date : Enter the date in the format DD/MM/YYYY Example : 31/12/2020 or 05/10/2020 } {pays : Example : SN or BF or CI or ML or TG or GW or BJ or NE}';
 
     /**
      * The console command description.
@@ -41,15 +41,9 @@ class ReportDaily extends Command
      */
     public function handle()
     {
-        $mois = $this->argument('mois');
+        $date = $this->argument('date');
         $pays = $this->argument('pays');
 
-        $m= (int)$mois;
-        if ($m <= 0 or $m >12)
-        {
-            $this->error('Erreur! Le mois saisi est incorrect');
-            return 0;
-        }
         $pays = strtoupper($pays);
         if ($pays != 'SN' and $pays != 'BF' and $pays != 'BJ' and $pays != 'ML' and $pays != 'TG' and $pays != 'NE' and $pays != 'GW' and $pays != 'CI')
         {
@@ -57,40 +51,15 @@ class ReportDaily extends Command
             return 0;
         }
 
-        $this->info('Mois : '.$mois. ', Pays : '. $pays);
-        $jourMax = 1;
-        switch ($mois){
-            case 5:
-            case 3:
-            case 7:
-            case 8:
-            case 10:
-            case 12:
-            case 1:
-                $jourMax=31;
-                break;
-            case 2:
-                $an = date('Y');
-                if ($an % 400 == 0){
-                    $jourMax=29;
-                }
-                else{
-                    $jourMax=28;
-                }
-                break;
-            case 6:
-            case 9:
-            case 11:
-            case 4:
-                $jourMax=30;
-                break;
-        }
-        $from = date('2020-'.$mois.'-01');
-        $to = date('2020-'.$mois.'-'.$jourMax);
-        $this->info('De : '.$from.', A : '.$to.', Pays : '.$pays);
-        $today = gmdate('d-m-Y-H-i');
+        $this->info('Jour : '.$date. ', Pays : '. $pays);
+        $d = explode('/',$date);
+        $jour = $d[0];
+        $mois = $d[1];
+        $annee = $d[2];
+        $heure = gmdate('H-i');
+        $today = $jour.'-'.$mois.'-'.$annee;
 
-        if (Excel::store(new RapportExport($mois,$pays), 'Rapport_'.$today.'_'.$pays.'_'.$mois.'.xlsx') /*Excel::store(new BillingExportMulti($mois,$pays),  'rapport_export_'.$pays.''.$mois.'_'.$today.'.xlsx') AND Excel::store(new DetailsMultiInstitution($mois,$pays),  'Details_Institutions_'.$pays.''.$mois.'_'.$today.'.xlsx')*/){
+        if (Excel::store(new RapportExport($date,$pays), 'Rapport_'.$pays.'_'.$today.'_'.$heure.'.xlsx') /*Excel::store(new BillingExportMulti($mois,$pays),  'rapport_export_'.$pays.''.$mois.'_'.$today.'.xlsx') AND Excel::store(new DetailsMultiInstitution($mois,$pays),  'Details_Institutions_'.$pays.''.$mois.'_'.$today.'.xlsx')*/){
             $this->info('Export successfully');
         }
         else{

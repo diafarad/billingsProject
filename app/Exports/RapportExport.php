@@ -7,25 +7,25 @@ use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 class RapportExport implements WithMultipleSheets
 {
     /**
-     * @var int
+     * @var string
      */
-    private $mois;
+    private $date;
     /**
      * @var string
      */
     private $pays;
 
-    public function __construct(int $mois,string $pays)
+    public function __construct(string $date,string $pays)
     {
-        $this->mois = $mois;
+        $this->date = $date;
         $this->pays = $pays;
     }
 
     public function sheets(): array
     {
         $sheets = [];
-        $sheets[] = new Dashboard($this->mois,$this->pays);
-        $sheets[] = new MyExport($this->mois,$this->pays);
+        $sheets[] = new Dashboard($this->date,$this->pays);
+        $sheets[] = new MyExport($this->date,$this->pays);
         return $sheets;
     }
 }

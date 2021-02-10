@@ -16,24 +16,28 @@ class MyExport implements
     WithTitle
 {
 
-    private $mois;
+    private $date;
     private $pays;
     private $jMax = 1;
 
     /**
      * BillingsExport constructor.
-     * @param $mois
+     * @param $date
      * @param $pays
      */
-    public function __construct($mois,$pays)
+    public function __construct($date,$pays)
     {
-        $this->mois = $mois;
+        $this->date = $date;
         $this->pays = $pays;
     }
 
     public function view(): View
     {
-        switch ($this->mois){
+        $d = explode('/',$this->date);
+        $jour = $d[0];
+        $mois = $d[1];
+        $annee = $d[2];
+        switch ($mois){
             case 5:
             case 3:
             case 7:
@@ -44,8 +48,7 @@ class MyExport implements
                 $this->jMax=31;
                 break;
             case 2:
-                $an = date('Y');
-                if ($an % 400 == 0){
+                if ($annee % 400 == 0){
                     $this->jMax=29;
                 }
                 else{
@@ -59,16 +62,20 @@ class MyExport implements
                 $this->jMax=30;
                 break;
         }
-        $from = date('2020-'.$this->mois.'-01');
-        $to = date('2020-'.$this->mois.'-'.$this->jMax);
+        $from = date($annee.'-'.$mois.'-01');
+        $to = date($annee.'-'.$mois.'-'.$this->jMax);
         $lesDates = DB::select('SELECT DISTINCT stats_date as d
                                 FROM billing_stats
                                 WHERE stats_date BETWEEN "'.$from.'" AND "'.$to.'"
                                 ORDER BY stats_date ASC');
-        $institutions = DB::select('SELECT DISTINCT subscriber_name as name
-                                    FROM billing_stats
-                                    WHERE subscriber_name like "%'.$this->pays.'"
-                                    ORDER BY subscriber_name ASC');
+        $lesBEF = DB::select('SELECT DISTINCT b.subscriber_name as name
+                                FROM billing_stats b, subscribers s
+                                WHERE b.subscriber_name=s.name AND lower(s.sector)="banque" AND b.subscriber_name like "%'.$this->pays.'"
+                                ORDER BY b.subscriber_name ASC');
+        $lesSFD = DB::select('SELECT DISTINCT b.subscriber_name as name
+                                FROM billing_stats b, subscribers s
+                                WHERE b.subscriber_name=s.name AND lower(s.sector)="autre sfd" AND b.subscriber_name like "%'.$this->pays.'"
+                                ORDER BY b.subscriber_name ASC');
         $nbBEF = DB::select('SELECT COUNT(DISTINCT b.subscriber_name) as n
                              FROM billing_stats b, subscribers s
                              WHERE b.subscriber_name = s.name
@@ -83,7 +90,8 @@ class MyExport implements
 
 
         return view('myexport', [
-            'institutions' => $institutions,
+            'lesBEF' => $lesBEF,
+            'lesSFD' => $lesSFD,
             'lesdates' => $lesDates,
             'from' => $from,
             'to' => $to,
@@ -121,12 +129,12 @@ class MyExport implements
                     $colorSFD = 'AX2:CA2';
                     break;
                 case 'SN':
-                    $range = 'B2:DQ4';
-                    $rangeTotal = 'A5:DQ5';
-                    $border = 'B2:DQ'.($this->jMax+5);
+                    $range = 'B2:DN4';
+                    $rangeTotal = 'A5:DN5';
+                    $border = 'B2:DN'.($this->jMax+5);
                     $borderDate = 'A5:A'.($this->jMax+5);
                     $colorBEF = 'B2:CG2';
-                    $colorSFD = 'CH2:DQ2';
+                    $colorSFD = 'CH2:DN2';
                     break;
                 case 'TG':
                     $range = 'B2:CA4';
