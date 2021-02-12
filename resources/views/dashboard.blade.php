@@ -94,9 +94,23 @@
                 $nbRapportConsultMois = \Illuminate\Support\Facades\DB::select('SELECT COUNT(usage_name) as "rapportConsMois"
                                                                                 FROM billing_stats
                                                                                 WHERE subscriber_name = "'.$bef->name.'"
-                                                                                AND (lower(usage_name) = "rapport de crédit bic civ plus" OR lower(usage_name) = "rapport de crédit bic civ vide")
+                                                                                AND ((lower(usage_name) = "rapport de crédit bic civ plus" AND lower(detail_name) = "données sur le crédit") OR lower(usage_name) = "rapport de crédit bic civ vide")
                                                                                 AND stats_date BETWEEN "'.$from.'" AND "'.$to.'"
                                                                                 GROUP BY subscriber_name');
+                $variance = \Illuminate\Support\Facades\DB::select('SELECT (((m1.n-n1.n)/n1.n)*100) as "result"
+                                                                    FROM (SELECT subscriber_name, COUNT(usage_name) as "n"
+                                                                            FROM billing_stats
+                                                                            WHERE subscriber_name = "'.$bef->name.'"
+                                                                            AND ((lower(usage_name) = "rapport de crédit bic civ plus" AND lower(detail_name) = "données sur le crédit") OR lower(usage_name) = "rapport de crédit bic civ vide")
+                                                                            AND stats_date BETWEEN "'.$from.'" AND "'.$aaaa.'-'.$mm.'-'.$jj.'"
+                                                                            GROUP BY subscriber_name) as m1,
+                                                                        (SELECT subscriber_name, COUNT(usage_name) as "n"
+                                                                            FROM billing_stats
+                                                                            WHERE subscriber_name = "'.$bef->name.'"
+                                                                            AND ((lower(usage_name) = "rapport de crédit bic civ plus" AND lower(detail_name) = "données sur le crédit") OR lower(usage_name) = "rapport de crédit bic civ vide")
+                                                                            AND stats_date BETWEEN "'.$aaaa.'-'.$mPrec.'-01" AND "'.$aaaa.'-'.$mPrec.'-30"
+                                                                            GROUP BY subscriber_name) as n1
+                                                                    WHERE m1.subscriber_name=n1.subscriber_name');
                 if(empty($nbUserAvailable)){
                 ?>
                 <td>0</td>
@@ -206,11 +220,48 @@
                 }
                 ?>
                 <td>25</td>
+                <?php
+                if (empty($variance)){
+                ?>
+                <td>0.00%</td>
+                <?php
+                }
+                else{
+
+                foreach ($variance as $v){
+                ?>
+                <td><?php echo number_format($v->result,2,'.',' ').'%'; ?></td>
+                <?php
+                }
+                }
+                ?>
             </tr>
         @endforeach
         <tr>
             <td></td>
             <td>TOTAL</td>
+            <?php
+            $nbUserAvailableTotal = \Illuminate\Support\Facades\DB::select('SELECT SUM(t.userAv) as "res"
+                                                                            FROM (SELECT COUNT(DISTINCT(b.user_name)) as "userAv"
+                                                                            FROM billing_stats b, subscribers s
+                                                                            WHERE b.subscriber_name LIKE "%'.$pays.'"
+                                                                            AND lower(s.sector) = "banque"
+                                                                            AND b.subscriber_name=s.name
+                                                                            GROUP BY b.subscriber_name) t');
+            if (empty($nbUserAvailableTotal)){
+            ?>
+            <td>0</td>
+            <?php
+            }
+            else{
+
+            foreach ($nbUserAvailableTotal as $n){
+            ?>
+            <td><?php echo $n->res; ?></td>
+            <?php
+            }
+            }
+            ?>
         </tr>
         <tr>
             <td></td>
@@ -263,14 +314,16 @@
                                                                                 WHERE subscriber_name = "'.$sfd->name.'"
                                                                                 GROUP BY subscriber_name');
                 $nbUserConsult = \Illuminate\Support\Facades\DB::select('SELECT COUNT(DISTINCT(user_name)) as "userCons"
-                                                                            FROM billing_stats
-                                                                            WHERE subscriber_name = "'.$sfd->name.'"
-                                                                            AND stats_date = "'.$today.'"
-                                                                        GROUP BY subscriber_name');
+                                                                            FROM billing_stats b, subscribers s
+                                                                            WHERE b.subscriber_name = "'.$sfd->name.'"
+                                                                            AND b.subscriber_name=s.name
+                                                                            AND b.stats_date = "'.$today.'"
+                                                                            AND ((lower(b.usage_name)="rapport de crédit bic civ plus" AND lower(b.detail_name)="données sur le crédit") OR lower(b.usage_name)="rapport de crédit bic civ vide")
+                                                                        GROUP BY b.subscriber_name');
                 $nbRapportConsult = \Illuminate\Support\Facades\DB::select('SELECT COUNT(usage_name) as "rapportCons"
                                                                                 FROM billing_stats
                                                                                 WHERE subscriber_name = "'.$sfd->name.'"
-                                                                                AND (lower(usage_name) = "rapport de crédit bic civ plus" OR lower(usage_name) = "rapport de crédit bic civ vide")
+                                                                                AND ((lower(usage_name) = "rapport de crédit bic civ plus" AND lower(detail_name)="données sur le crédit") OR lower(usage_name) = "rapport de crédit bic civ vide")
                                                                                 AND stats_date = "'.$today.'"
                                                                                 GROUP BY subscriber_name');
                 $prcentRapportData = \Illuminate\Support\Facades\DB::select('SELECT ((b1.nbData*100)/(b1.nbData+b2.nbVide)) as "Pourcentage"
@@ -288,14 +341,15 @@
                                                                                     GROUP BY subscriber_name) b2
                                                                                 WHERE b1.subscriber_name=b2.subscriber_name');
                 $nbUserMoisConsult = \Illuminate\Support\Facades\DB::select('SELECT COUNT(DISTINCT(user_name)) as "userMoisCons"
-                                                                            FROM billing_stats
-                                                                            WHERE subscriber_name = "'.$sfd->name.'"
-                                                                            AND stats_date BETWEEN "'.$from.'" AND "'.$to.'"
-                                                                            GROUP BY subscriber_name');
+                                                                                FROM billing_stats
+                                                                                WHERE subscriber_name = "'.$sfd->name.'"
+                                                                                AND stats_date BETWEEN "'.$from.'" AND "'.$to.'"
+                                                                                AND ((lower(usage_name) = "rapport de crédit bic civ plus" AND lower(detail_name) = "données sur le crédit") OR lower(usage_name) = "rapport de crédit bic civ vide")
+                                                                                GROUP BY subscriber_name');
                 $volumeMoyen = \Illuminate\Support\Facades\DB::select('SELECT (COUNT(usage_name)/20) as "volMoy"
                                                                                 FROM billing_stats
                                                                                 WHERE subscriber_name = "'.$sfd->name.'"
-                                                                                AND (lower(usage_name) = "rapport de crédit bic civ plus" OR lower(usage_name) = "rapport de crédit bic civ vide")
+                                                                                AND ((lower(usage_name) = "rapport de crédit bic civ plus" AND lower(detail_name) = "données sur le crédit") OR lower(usage_name) = "rapport de crédit bic civ vide")
                                                                                 AND stats_date BETWEEN "'.$from.'" AND "'.$to.'"
                                                                                 GROUP BY subscriber_name');
                 $prcentRapportDataMois = \Illuminate\Support\Facades\DB::select('SELECT ((b1.nbData*100)/(b1.nbData+b2.nbVide)) as "PourcentageMois"
@@ -315,9 +369,23 @@
                 $nbRapportConsultMois = \Illuminate\Support\Facades\DB::select('SELECT COUNT(usage_name) as "rapportConsMois"
                                                                                 FROM billing_stats
                                                                                 WHERE subscriber_name = "'.$sfd->name.'"
-                                                                                AND (lower(usage_name) = "rapport de crédit bic civ plus" OR lower(usage_name) = "rapport de crédit bic civ vide")
+                                                                                AND ((lower(usage_name) = "rapport de crédit bic civ plus" AND lower(detail_name)="données sur le crédit") OR lower(usage_name) = "rapport de crédit bic civ vide")
                                                                                 AND stats_date BETWEEN "'.$from.'" AND "'.$to.'"
                                                                                 GROUP BY subscriber_name');
+                $variance = \Illuminate\Support\Facades\DB::select('SELECT (((m1.n-n1.n)/n1.n)*100) as "result"
+                                                                    FROM (SELECT subscriber_name, COUNT(usage_name) as "n"
+                                                                            FROM billing_stats
+                                                                            WHERE subscriber_name = "'.$sfd->name.'"
+                                                                            AND ((lower(usage_name) = "rapport de crédit bic civ plus" AND lower(detail_name) = "données sur le crédit") OR lower(usage_name) = "rapport de crédit bic civ vide")
+                                                                            AND stats_date BETWEEN "'.$from.'" AND "'.$aaaa.'-'.$mm.'-'.$jj.'"
+                                                                            GROUP BY subscriber_name) as m1,
+                                                                        (SELECT subscriber_name, COUNT(usage_name) as "n"
+                                                                            FROM billing_stats
+                                                                            WHERE subscriber_name = "'.$sfd->name.'"
+                                                                            AND ((lower(usage_name) = "rapport de crédit bic civ plus" AND lower(detail_name) = "données sur le crédit") OR lower(usage_name) = "rapport de crédit bic civ vide")
+                                                                            AND stats_date BETWEEN "'.$aaaa.'-'.$mPrec.'-01" AND "'.$aaaa.'-'.$mPrec.'-30"
+                                                                            GROUP BY subscriber_name) as n1
+                                                                    WHERE m1.subscriber_name=n1.subscriber_name');
                 if(empty($nbUserAvailable)){
                 ?>
                 <td>0</td>
@@ -427,11 +495,236 @@
                 }
                 ?>
                 <td>25</td>
+                <?php
+                if (empty($variance)){
+                ?>
+                <td>0.00%</td>
+                <?php
+                }
+                else{
+
+                foreach ($variance as $v){
+                ?>
+                <td><?php echo number_format($v->result,2,'.',' ').'%'; ?></td>
+                <?php
+                }
+                }
+                ?>
             </tr>
         @endforeach
         <tr>
             <td></td>
             <td>TOTAL</td>
+            <?php
+            $nbUserAvailableTotal = \Illuminate\Support\Facades\DB::select('SELECT SUM(t.userAv) as "res"
+                                                                            FROM (SELECT COUNT(DISTINCT(b.user_name)) as "userAv"
+                                                                            FROM billing_stats b, subscribers s
+                                                                            WHERE b.subscriber_name LIKE "%'.$pays.'"
+                                                                            AND lower(s.sector) = "autre sfd"
+                                                                            AND b.subscriber_name=s.name
+                                                                            GROUP BY b.subscriber_name) t');
+            if (empty($nbUserAvailableTotal)){
+            ?>
+            <td>0</td>
+            <?php
+            }
+            else{
+
+            foreach ($nbUserAvailableTotal as $n){
+            ?>
+            <td><?php echo $n->res; ?></td>
+            <?php
+            }
+            }
+            ?>
+            <?php
+            $nbUserConsultTotal = \Illuminate\Support\Facades\DB::select('SELECT SUM(t.userAv) as "res"
+                                                                            FROM (SELECT COUNT(DISTINCT(b.user_name)) as "userAv"
+                                                                            FROM billing_stats b, subscribers s
+                                                                            WHERE b.subscriber_name LIKE "%'.$pays.'"
+                                                                            AND lower(s.sector) = "autre sfd"
+                                                                            AND ((lower(b.usage_name)="rapport de crédit bic civ plus" AND lower(b.detail_name)="données sur le crédit") OR lower(b.usage_name)="rapport de crédit bic civ vide")
+                                                                            AND b.subscriber_name=s.name
+                                                                            AND b.stats_date = "'.$today.'"
+                                                                            GROUP BY b.subscriber_name) t');
+            if (empty($nbUserConsultTotal)){
+            ?>
+            <td>0</td>
+            <?php
+            }
+            else{
+
+            foreach ($nbUserConsultTotal as $n){
+            ?>
+            <td><?php echo $n->res; ?></td>
+            <?php
+            }
+            }
+            ?>
+            <?php
+            $nbRapportTotal = \Illuminate\Support\Facades\DB::select('SELECT SUM(t.rapportCons) as "res"
+                                                                            FROM (SELECT COUNT(usage_name) as "rapportCons"
+                                                                                    FROM billing_stats b, subscribers s
+                                                                                    WHERE b.subscriber_name LIKE "%'.$pays.'"
+                                                                                    AND lower(s.sector) = "autre sfd"
+                                                                                    AND b.subscriber_name=s.name
+                                                                                    AND ((lower(b.usage_name) = "rapport de crédit bic civ plus" AND lower(b.detail_name)="données sur le crédit") OR lower(b.usage_name) = "rapport de crédit bic civ vide")
+                                                                                    AND b.stats_date = "'.$today.'"
+                                                                                    GROUP BY b.subscriber_name) t');
+            if (empty($nbRapportTotal)){
+            ?>
+            <td>0</td>
+            <?php
+            }
+            else{
+
+            foreach ($nbRapportTotal as $n){
+            ?>
+            <td><?php echo $n->res; ?></td>
+            <?php
+            }
+            }
+            ?>
+            <?php
+            $prcentRapportDataTotal = \Illuminate\Support\Facades\DB::select('SELECT SUM(t.Pourcentage) as "res"
+                                                                            FROM (SELECT ((b1.nbData*100)/(b1.nbData+b2.nbVide)) as "Pourcentage"
+                                                                                    FROM (SELECT b.subscriber_name, COUNT(b.usage_name) as "nbData"
+                                                                                        FROM billing_stats b, subscribers s
+                                                                                        WHERE b.subscriber_name LIKE "%'.$pays.'"
+                                                                                        AND b.subscriber_name = s.name
+                                                                                        AND lower(s.sector)="autre sfd"
+                                                                                        AND lower(b.usage_name) = "rapport de crédit bic civ plus" AND lower(b.detail_name) = "données sur le crédit"
+                                                                                        AND b.stats_date = "'.$today.'"
+                                                                                        GROUP BY b.subscriber_name) b1,
+                                                                                        (SELECT b.subscriber_name, COUNT(b.usage_name) as "nbVide"
+                                                                                        FROM billing_stats b, subscribers s
+                                                                                        WHERE b.subscriber_name LIKE "%'.$pays.'"
+                                                                                        AND b.subscriber_name = s.name
+                                                                                        AND lower(s.sector)="autre sfd"
+                                                                                        AND lower(b.usage_name) = "rapport de crédit bic civ vide"
+                                                                                        AND b.stats_date = "'.$today.'"
+                                                                                        GROUP BY b.subscriber_name) b2
+                                                                                    WHERE b1.subscriber_name=b2.subscriber_name) t');
+            if (empty($prcentRapportDataTotal)){
+            ?>
+            <td>0.00%</td>
+            <?php
+            }
+            else{
+
+            foreach ($prcentRapportDataTotal as $n){
+            ?>
+            <td><?php echo number_format($n->res,2,'.',' ').'%'; ?></td>
+            <?php
+            }
+            }
+            ?>
+            <td>100</td>
+            <?php
+            $nbUserMoisConsultTotal = \Illuminate\Support\Facades\DB::select('SELECT SUM(t.userMoisCons) as "res"
+                                                                            FROM (SELECT COUNT(DISTINCT(b.user_name)) as "userMoisCons"
+                                                                                    FROM billing_stats b, subscribers s
+                                                                                    WHERE b.subscriber_name LIKE "%'.$pays.'"
+                                                                                    AND lower(s.sector) = "autre sfd"
+                                                                                    AND b.subscriber_name=s.name
+                                                                                    AND ((lower(b.usage_name) = "rapport de crédit bic civ plus" AND lower(b.detail_name)="données sur le crédit") OR lower(b.usage_name) = "rapport de crédit bic civ vide")
+                                                                                    AND b.stats_date BETWEEN "'.$from.'" AND "'.$today.'"
+                                                                                    GROUP BY b.subscriber_name) t');
+            if (empty($nbUserMoisConsultTotal)){
+            ?>
+            <td>0</td>
+            <?php
+            }
+            else{
+
+            foreach ($nbUserMoisConsultTotal as $n){
+            ?>
+            <td><?php echo $n->res; ?></td>
+            <?php
+            }
+            }
+            ?>
+            <?php
+            $volumeMoyenTotal = \Illuminate\Support\Facades\DB::select('SELECT SUM(t.volMoy) as "res"
+                                                                            FROM (SELECT (COUNT(b.usage_name)/20) as "volMoy"
+                                                                                    FROM billing_stats b, subscribers s
+                                                                                    WHERE b.subscriber_name LIKE "%'.$pays.'"
+                                                                                    AND lower(s.sector) = "autre sfd"
+                                                                                    AND b.subscriber_name=s.name
+                                                                                    AND ((lower(b.usage_name) = "rapport de crédit bic civ plus" AND lower(b.detail_name) = "données sur le crédit") OR lower(b.usage_name) = "rapport de crédit bic civ vide")
+                                                                                    AND b.stats_date BETWEEN "'.$from.'" AND "'.$today.'"
+                                                                                    GROUP BY b.subscriber_name) t');
+            if (empty($volumeMoyenTotal)){
+            ?>
+            <td>0</td>
+            <?php
+            }
+            else{
+            foreach ($volumeMoyenTotal as $n){
+            ?>
+            <td><?php echo $n->res; ?></td>
+            <?php
+            }
+            }
+            ?>
+            <?php
+            $nbRapportDataMoisTotal = \Illuminate\Support\Facades\DB::select('SELECT SUM(t.PourcentageMois) as "res"
+                                                                                FROM (SELECT ((b1.nbData*100)/(b1.nbData+b2.nbVide)) as "PourcentageMois"
+                                                                                        FROM (SELECT b.subscriber_name, COUNT(b.usage_name) as "nbData"
+                                                                                        FROM billing_stats b, subscribers s
+                                                                                        WHERE b.subscriber_name LIKE "%'.$pays.'"
+                                                                                        AND b.subscriber_name = s.name
+                                                                                        AND lower(s.sector)="autre sfd"
+                                                                                        AND lower(b.usage_name) = "rapport de crédit bic civ plus" AND lower(b.detail_name) = "données sur le crédit"
+                                                                                        AND b.stats_date BETWEEN "'.$from.'" AND "'.$today.'"
+                                                                                        GROUP BY b.subscriber_name) b1,
+                                                                                        (SELECT b.subscriber_name, COUNT(b.usage_name) as "nbVide"
+                                                                                        FROM billing_stats b, subscribers s
+                                                                                        WHERE b.subscriber_name LIKE "%'.$pays.'"
+                                                                                        AND b.subscriber_name = s.name
+                                                                                        AND lower(s.sector)="autre sfd"
+                                                                                        AND lower(b.usage_name) = "rapport de crédit bic civ vide"
+                                                                                        AND b.stats_date BETWEEN "'.$from.'" AND "'.$today.'"
+                                                                                        GROUP BY b.subscriber_name) b2
+                                                                                        WHERE b1.subscriber_name=b2.subscriber_name) t');
+            if (empty($nbRapportDataMoisTotal)){
+            ?>
+            <td>0.00%</td>
+            <?php
+            }
+            else{
+
+            foreach ($nbRapportDataMoisTotal as $n){
+            ?>
+            <td><?php echo number_format($n->res,2,'.',' ').'%'; ?></td>
+            <?php
+            }
+            }
+            ?>
+            <?php
+            $nbRapportConsultMoisTotal = \Illuminate\Support\Facades\DB::select('SELECT SUM(t.rapportConsMois) as "res"
+                                                                                 FROM (SELECT COUNT(b.usage_name) as "rapportConsMois"
+                                                                                    FROM billing_stats b, subscribers s
+                                                                                    WHERE b.subscriber_name LIKE "%'.$pays.'"
+                                                                                    AND lower(s.sector) = "autre sfd"
+                                                                                    AND b.subscriber_name=s.name
+                                                                                    AND ((lower(b.usage_name) = "rapport de crédit bic civ plus" AND lower(b.detail_name)="données sur le crédit") OR lower(b.usage_name) = "rapport de crédit bic civ vide")
+                                                                                    AND b.stats_date BETWEEN "'.$from.'" AND "'.$to.'"
+                                                                                    GROUP BY b.subscriber_name) t');
+            if (empty($nbRapportConsultMoisTotal)){
+            ?>
+            <td>0</td>
+            <?php
+            }
+            else{
+            foreach ($nbRapportConsultMoisTotal as $n){
+            ?>
+            <td><?php echo $n->res; ?></td>
+            <?php
+            }
+            }
+            ?>
+            <td>200</td>
         </tr>
         <tr>
             <td></td>
@@ -439,6 +732,6 @@
         </tr>
     </tbody>
 </table>
-    <?php
-        }
-    ?>
+<?php
+    }
+?>

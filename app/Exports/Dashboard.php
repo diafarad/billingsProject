@@ -37,19 +37,25 @@ class Dashboard implements
         $d = explode('/',$this->date);
         $jour = $d[0];
         $mois = $d[1];
+        $moisPrec = 0;
         $annee = $d[2];
         $today = $annee.'-'.$mois.'-'.$jour;
         switch ($mois){
+            case 1:
+                $moisPrec = 12;
+                $this->jMax=31;
+                break;
             case 5:
             case 3:
             case 7:
             case 8:
             case 10:
             case 12:
-            case 1:
+                $moisPrec = $mois - 1;
                 $this->jMax=31;
                 break;
             case 2:
+                $moisPrec = $mois - 1;
                 if ($annee % 400 == 0){
                     $this->jMax=29;
                 }
@@ -61,6 +67,7 @@ class Dashboard implements
             case 9:
             case 11:
             case 4:
+                $moisPrec = $mois - 1;
                 $this->jMax=30;
                 break;
         }
@@ -98,6 +105,11 @@ class Dashboard implements
             'to' => $to,
             'jour' => $this->date,
             'today' => $today,
+            'jj' => $jour,
+            'mm' => $mois,
+            'aaaa' => $annee,
+            'mPrec' => $moisPrec,
+            'pays' => $this->pays,
         ]);
     }
 
@@ -155,6 +167,7 @@ class Dashboard implements
                 $row = $this->nbreBef+5;
                 $event->sheet->getDelegate()->getStyle('F4:F'.$row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
                 $event->sheet->getDelegate()->getStyle('J4:J'.$row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                $event->sheet->getDelegate()->getStyle('M4:M'.$row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
                 if($this->nbreSfd>0){
                     $b1 = $this->nbreBef+14;
@@ -212,6 +225,7 @@ class Dashboard implements
                     $l1 = $l1+$l;
                     $event->sheet->getDelegate()->getStyle('F'.$l.':F'.$l1)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
                     $event->sheet->getDelegate()->getStyle('J'.$l.':J'.$l1)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                    $event->sheet->getDelegate()->getStyle('M'.$l.':M'.$l1)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
                 }
             }
         ];
