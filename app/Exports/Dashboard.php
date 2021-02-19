@@ -201,6 +201,7 @@ class Dashboard implements
                 $event->sheet->getDelegate()->getStyle('F4:F'.$row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
                 $event->sheet->getDelegate()->getStyle('J4:J'.$row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
                 $event->sheet->getDelegate()->getStyle('M4:M'.$row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                $event->sheet->getDelegate()->getStyle('D'.$row.':L'.$row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
                 if($this->nbreSfd>0){
                     $b1 = $this->nbreBef+14;
@@ -281,6 +282,7 @@ class Dashboard implements
                     $event->sheet->getDelegate()->getStyle('F'.$l.':F'.$l1)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
                     $event->sheet->getDelegate()->getStyle('J'.$l.':J'.$l1)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
                     $event->sheet->getDelegate()->getStyle('M'.$l.':M'.$l1)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                    $event->sheet->getDelegate()->getStyle('D'.$l1.':L'.$l1)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
                 }
             }
         ];
