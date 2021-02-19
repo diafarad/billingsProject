@@ -122,7 +122,10 @@ class Dashboard implements
                 $b = $this->nbreBef+5;
                 $colorRange1 = 'C2:G2';
                 $colorRange2 = 'H2:M2';
-                $borderBEF = 'B4:M'.$b;
+                $borderBEF = 'B4:L'.$b;
+                $v = $this->nbreBef+3;
+                $bold1=$v+1;
+                $bold2=$bold1+1;
 
                 $event->sheet->getDelegate()->getStyle($range)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 $event->sheet->getDelegate()->getDefaultColumnDimension()->setWidth(15);
@@ -131,7 +134,37 @@ class Dashboard implements
                         'bold' => 'true'
                     ]
                 ]);
+                $event->sheet->getStyle('M3:M'.$v)->applyFromArray([
+                    'font' => [
+                        'bold' => 'true'
+                    ]
+                ]);
+                $event->sheet->getStyle('B4:B'.$v)->applyFromArray([
+                    'font' => [
+                        'bold' => 'true'
+                    ]
+                ]);
+                $a = $this->nbreBef+14;
+                $a1 = $a+$this->nbreSfd-1;
+                $event->sheet->getStyle('B'.$a.':B'.$a1)->applyFromArray([
+                    'font' => [
+                        'bold' => 'true'
+                    ]
+                ]);
+                $event->sheet->getStyle('B'.$bold1.':M'.$bold2)->applyFromArray([
+                    'font' => [
+                        'bold' => 'true'
+                    ]
+                ]);
                 $event->sheet->getStyle('C2:M2')->applyFromArray([
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color' => ['argb' => '000000'],
+                        ],
+                    ],
+                ]);
+                $event->sheet->getStyle('M3:M'.$v)->applyFromArray([
                     'borders' => [
                         'allBorders' => [
                             'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
@@ -148,7 +181,7 @@ class Dashboard implements
                     ],
                 ]);
 
-                $event->sheet->getStyle('B3:M3')->applyFromArray([
+                $event->sheet->getStyle('B3:L3')->applyFromArray([
                     'borders' => [
                         'allBorders' => [
                             'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
@@ -175,13 +208,26 @@ class Dashboard implements
                     $ok = $this->nbreBef+12;
                     $colorSFD1 = 'C'.$ok.':'.'G'.$ok;
                     $colorSFD2 = 'H'.$ok.':'.'M'.$ok;
-                    $borderSFD = 'B'.$b1.':'.'M'.$b2;
+                    $borderSFD = 'B'.$b1.':'.'L'.$b2;
+                    $okay=$b1+($this->nbreSfd-1);
+                    $okay2 = $b1+$this->nbreSfd;
+                    $okay3 = $b1+$this->nbreSfd+1;
 
                     $event->sheet->getDelegate()->getStyle($colorSFD1)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                     $event->sheet->getDelegate()->getStyle($colorSFD2)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
                     $col = $ok+1;
                     $event->sheet->getStyle('A'.$ok.':P'.$col)->applyFromArray([
+                        'font' => [
+                            'bold' => 'true'
+                        ]
+                    ]);
+                    $event->sheet->getStyle('M'.$b1.':M'.$okay)->applyFromArray([
+                        'font' => [
+                            'bold' => 'true'
+                        ]
+                    ]);
+                    $event->sheet->getStyle('B'.$okay2.':L'.$okay3)->applyFromArray([
                         'font' => [
                             'bold' => 'true'
                         ]
@@ -204,7 +250,16 @@ class Dashboard implements
                         ],
                     ]);
                     $r = $ok+1;
-                    $event->sheet->getStyle('B'.$r.':M'.$r)->applyFromArray([
+                    $event->sheet->getStyle('B'.$r.':L'.$r)->applyFromArray([
+                        'borders' => [
+                            'allBorders' => [
+                                'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                                'color' => ['argb' => '000000'],
+                            ],
+                        ],
+                    ]);
+                    $bv = $col+$this->nbreSfd;
+                    $event->sheet->getStyle('M'.$col.':M'.$bv)->applyFromArray([
                         'borders' => [
                             'allBorders' => [
                                 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
