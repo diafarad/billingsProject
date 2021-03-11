@@ -170,39 +170,39 @@ class MyExport implements
                     break;
             }
 
-                $event->sheet->getDelegate()->getStyle($range)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $event->sheet->getDelegate()->getDefaultColumnDimension()->setWidth(12);
-                $event->sheet->getStyle($range)->applyFromArray([
-                    'font' => [
-                        'bold' => 'true'
-                    ]
-                ]);
-                $event->sheet->getStyle($rangeTotal)->applyFromArray([
-                    'font' => [
-                        'bold' => 'true'
-                    ]
-                ]);
-                $event->sheet->getStyle($border)->applyFromArray([
-                    'borders' => [
-                        'allBorders' => [
-                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-                            'color' => ['argb' => '000000'],
-                        ],
+            $event->sheet->getDelegate()->getStyle($range)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $event->sheet->getDelegate()->getDefaultColumnDimension()->setWidth(12);
+            $event->sheet->getStyle($range)->applyFromArray([
+                'font' => [
+                    'bold' => 'true'
+                ]
+            ]);
+            $event->sheet->getStyle($rangeTotal)->applyFromArray([
+                'font' => [
+                    'bold' => 'true'
+                ]
+            ]);
+            $event->sheet->getStyle($border)->applyFromArray([
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                        'color' => ['argb' => '000000'],
                     ],
-                ]);
-                $event->sheet->getStyle($borderDate)->applyFromArray([
-                    'borders' => [
-                        'allBorders' => [
-                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-                            'color' => ['argb' => '000000'],
-                        ],
+                ],
+            ]);
+            $event->sheet->getStyle($borderDate)->applyFromArray([
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                        'color' => ['argb' => '000000'],
                     ],
-                ]);
-                $event->sheet->getDelegate()->getStyle($colorBEF)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
-                    ->getStartColor()->setARGB('2995d7');
-                if ($this->pays != 'GW')
-                $event->sheet->getDelegate()->getStyle($colorSFD)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
-                    ->getStartColor()->setARGB('fe2c00');
+                ],
+            ]);
+            $event->sheet->getDelegate()->getStyle($colorBEF)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                ->getStartColor()->setARGB('2995d7');
+            if ($this->pays != 'GW')
+            $event->sheet->getDelegate()->getStyle($colorSFD)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                ->getStartColor()->setARGB('fe2c00');
             }
         ];
     }

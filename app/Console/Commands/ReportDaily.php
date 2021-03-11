@@ -57,7 +57,8 @@ class ReportDaily extends Command
         $mois = $d[1];
         $annee = $d[2];
         $heure = gmdate('H-i-s');
-        $today = $jour.'-'.$mois.'-'.$annee;
+        $day = date('d-m-Y');
+        $today = $jour.''.$mois.''.$annee.'_'.$day;
 
         if (Excel::store(new RapportExport($date,$pays), 'Rapport_'.$pays.'_'.$today.'_'.$heure.'.xlsx') /*Excel::store(new BillingExportMulti($mois,$pays),  'rapport_export_'.$pays.''.$mois.'_'.$today.'.xlsx') AND Excel::store(new DetailsMultiInstitution($mois,$pays),  'Details_Institutions_'.$pays.''.$mois.'_'.$today.'.xlsx')*/){
             $this->info('Export successfully');
